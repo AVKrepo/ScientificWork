@@ -37,3 +37,50 @@ def transform_four_points_to_four_points(image, start_points, end_points):
     return resulted_image
 
 
+def determine_new_corners(corners, mode="habr"):
+    corners = order_points(corners)
+    if mode == "habr":
+        # See https://habr.com/ru/post/223507/ for general idea of this approach
+        mass_center = np.mean(corners, axis=0)
+
+        def line(p1, p2):
+            A = (p1[1] - p2[1])
+            B = (p2[0] - p1[0])
+            C = (p1[0] * p2[1] - p2[0] * p1[1])
+            return A, B, -C
+
+        def intersection(L1, L2):
+            D = L1[0] * L2[1] - L1[1] * L2[0]
+            Dx = L1[2] * L2[1] - L1[1] * L2[2]
+            Dy = L1[0] * L2[2] - L1[2] * L2[0]
+            if D != 0:
+                x = Dx / D
+                y = Dy / D
+                return x, y
+            else:
+                assert(False, "There is no intersection between two lines")
+
+        intersection_point = np.array(intersection(line(corners[0], corners[2]),
+                                                   line(corners[1], corners[3])))
+        delta = np.abs(mass_center - intersection_point)
+        top_left, top_right, down_right, down_left = corners
+        left_height = np.abs(top_left[1] - down_left[1])
+        right_height = np.abs(top_right[1] - down_right[1])
+        down_width = np.abs(down_left[0] - down_right[0])
+        top_width = np.abs(top_right[0] - top_left[0])
+        target_width = int(0.5 * (top_width + down_width) + 2 * delta[0])
+        target_height = int(0.5 * (left_height + right_height) + 2 * delta[1])
+    new_corners = np.array([[0, 0],
+                            [target_width, target_height],
+                            [target_width, 0],
+                            [0, target_height]])
+    return order_points(new_corners)
+
+
+def remove_perspective_distortion(image, corners):
+    new_corners = determine_new_corners(corners)
+    transformed_image = transform_four_points_to_four_points(image, corners, new_corners)
+    return transformed_image
+
+
+
