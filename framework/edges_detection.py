@@ -3,7 +3,13 @@ import numpy as np
 from collections import defaultdict
 
 
+import sys
+sys.path.append("..")
+from framework import visualize
+
+
 SHORT_SIDE_SMALL_LEN = 300
+CANNY_EDGE_DETECTOR_PARAMETER = 1.2
 
 
 def reduce_image_size(image, future_short_side_len=SHORT_SIDE_SMALL_LEN):
@@ -41,9 +47,26 @@ def canny_edge_detector(image):
     :return: edges mask (np.uint8 array with values 0 or 255)
     """
     grey_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    high_thresh, thresh_im = cv2.threshold(grey_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    dispersion = grey_dispersion = np.std(grey_image)
+    string = "greyscale image"
+    visualize.visualize_image(grey_image, string)
+    resulted_channel = grey_image
+    for i in range(3):
+        single_channel = image[:, :, i]
+        new_dispersion = np.std(single_channel)
+        new_string = f"{i} channel of image"
+        visualize.visualize_image(single_channel, new_string)
+        if new_dispersion > CANNY_EDGE_DETECTOR_PARAMETER * grey_dispersion and new_dispersion > dispersion:
+            dispersion = new_dispersion
+            string = new_string
+            resulted_channel = grey_image
+
+    print(f"For CannyEdgeDetection {string} was chosen")
+
+    high_thresh, thresh_im = cv2.threshold(resulted_channel, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     low_thresh = 0.5 * high_thresh
-    edges = cv2.Canny(image, low_thresh, high_thresh)
+    # edges = cv2.Canny(image, low_thresh, high_thresh)
+    edges = cv2.Canny(resulted_channel, low_thresh, high_thresh)
     return edges
 
 

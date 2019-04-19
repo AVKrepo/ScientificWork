@@ -12,7 +12,7 @@ def visualize_image(image, title="", mode="show", inplace=False):
     Function for visualizing image
     :param image: image, which was read by opencv
     :param title: title for the window, optional
-    :param mode: string from list ["show", "save"]
+    :param mode: string from list ["show", "save", "both"]
     :param inplace: boolean
     """
     if inplace:  # matplotlib mode
@@ -26,7 +26,12 @@ def visualize_image(image, title="", mode="show", inplace=False):
     else:
         image_to_show = image
 
-        if mode == "show":  # show, using OpenCV windows
+        if mode == "save" or mode == "both":  # saving to file
+            global FILE_NUM_TO_SAVE
+            cv2.imwrite(str(FILE_NUM_TO_SAVE) + ".jpg", image_to_show)
+            FILE_NUM_TO_SAVE += 1
+
+        if mode == "show" or mode == "both":  # show, using OpenCV windows
             if max(image.shape) > MAX_SIZE_TO_SHOW:
                 max_side = np.max(image_to_show.shape[:2])
                 new_max_side = MAX_SIZE_TO_SHOW
@@ -38,8 +43,3 @@ def visualize_image(image, title="", mode="show", inplace=False):
 
             cv2.imshow(title, image_to_show)
             cv2.waitKey(0)
-
-        elif mode == "save":  # saving to file
-            global FILE_NUM_TO_SAVE
-            cv2.imwrite(str(FILE_NUM_TO_SAVE) + ".jpg", image_to_show)
-            FILE_NUM_TO_SAVE += 1
