@@ -37,7 +37,7 @@ def transform_four_points_to_four_points(image, start_points, end_points):
     return resulted_image
 
 
-def determine_new_corners(corners, mode="habr"):
+def determine_new_corners(corners, image, mode="zhang"):
     corners = order_points(corners)
 
     top_left, top_right, down_right, down_left = corners
@@ -46,37 +46,99 @@ def determine_new_corners(corners, mode="habr"):
     down_width = np.abs(down_left[0] - down_right[0])
     top_width = np.abs(top_right[0] - top_left[0])
 
-    if mode == "naive":
-        # New height and width will be max vertical and horizontal sides
-        target_width = int(max(top_width, down_width))
-        target_height = int(max(left_height, right_height))
+    target_height = None
+    target_width = None
 
-    elif mode == "habr":
-        # See https://habr.com/ru/post/223507/ for general idea of this approach
-        mass_center = np.mean(corners, axis=0)
+    while not target_height or not target_width:
 
-        def line(p1, p2):
-            A = (p1[1] - p2[1])
-            B = (p2[0] - p1[0])
-            C = (p1[0] * p2[1] - p2[0] * p1[1])
-            return A, B, -C
+        if mode == "naive" or mode == "all":
+            # New height and width will be max vertical and horizontal sides
+            print("mode == naive")
+            target_width = int(max(top_width, down_width))
+            target_height = int(max(left_height, right_height))
 
-        def intersection(L1, L2):
-            D = L1[0] * L2[1] - L1[1] * L2[0]
-            Dx = L1[2] * L2[1] - L1[1] * L2[2]
-            Dy = L1[0] * L2[2] - L1[2] * L2[0]
-            if D != 0:
-                x = Dx / D
-                y = Dy / D
-                return x, y
-            else:
-                assert(False, "There is no intersection between two lines")
+            print(target_height / target_width)
 
-        intersection_point = np.array(intersection(line(corners[0], corners[2]),
-                                                   line(corners[1], corners[3])))
-        delta = np.abs(mass_center - intersection_point)
-        target_width = int(0.5 * (top_width + down_width) + 2 * delta[0])
-        target_height = int(0.5 * (left_height + right_height) + 2 * delta[1])
+        if mode == "habr" or mode == "all":
+            # See https://habr.com/ru/post/223507/ for general idea of this approach
+            print("mode == habr")
+            mass_center = np.mean(corners, axis=0)
+
+            def line(p1, p2):
+                A = (p1[1] - p2[1])
+                B = (p2[0] - p1[0])
+                C = (p1[0] * p2[1] - p2[0] * p1[1])
+                return A, B, -C
+
+            def intersection(L1, L2):
+                D = L1[0] * L2[1] - L1[1] * L2[0]
+                Dx = L1[2] * L2[1] - L1[1] * L2[2]
+                Dy = L1[0] * L2[2] - L1[2] * L2[0]
+                if D != 0:
+                    x = Dx / D
+                    y = Dy / D
+                    return x, y
+                else:
+                    assert(False, "There is no intersection between two lines")
+
+            intersection_point = np.array(intersection(line(corners[0], corners[2]),
+                                                       line(corners[1], corners[3])))
+            delta = np.abs(mass_center - intersection_point)
+            target_width = int(0.5 * (top_width + down_width) + 2 * delta[0])
+            target_height = int(0.5 * (left_height + right_height) + 2 * delta[1])
+
+            print(target_height / target_width)
+
+        if mode == "zhang" or mode == "all":
+                print("mode == zhang")
+                m1x, m1y = down_left
+                m2x, m2y = down_right
+                m3x, m3y = top_left
+                m4x, m4y = top_right
+
+                # u0, v0 = down_left  ## it is not good way!!!
+
+                v0 = image.shape[0] / 2
+                u0 = image.shape[1] / 2
+
+                m1x -= u0
+                m1y -= v0
+                m2x -= u0
+                m2y -= v0
+                m3x -= u0
+                m3y -= v0
+                m4x -= u0
+                m4y -= v0
+
+                k2 = ((m1y - m4y) * m3x - (m1x - m4x) * m3y + m1x * m4y - m1y * m4x) / \
+                     ((m2y - m4y) * m3x - (m2x - m4x) * m3y + m2x * m4y - m2y * m4x)
+                k3 = ((m1y - m4y) * m2x - (m1x - m4x) * m2y + m1x * m4y - m1y * m4x) / \
+                     ((m3y - m4y) * m2x - (m3x - m4x) * m2y + m3x * m4y - m3y * m4x)
+
+                print(k2, k3)
+
+                f_squared = -((k3 * m3y - m1y) * (k2 * m2y - m1y) + (k3 * m3x - m1x) * (k2 * m2x - m1x)) / \
+                            ((k3 - 1) * (k2 - 1))
+
+                def sqr(x):
+                    return x ** 2
+
+                wh_ratio = np.sqrt(
+                    (sqr(k2 - 1) + sqr(k2 * m2y - m1y) / f_squared + sqr(k2 * m2x - m1x) / f_squared) /
+                    (sqr(k3 - 1) + sqr(k3 * m3y - m1y) / f_squared + sqr(k3 * m3x - m1x) / f_squared)
+                )
+
+                print("hight / width:", 1 / wh_ratio)
+                print("width / hight:", wh_ratio)
+
+                target_width = max(top_width, down_width)
+                target_height = max(left_height, right_height)
+                target_height = max(target_height, target_width / wh_ratio)
+                target_width = target_height * wh_ratio
+
+                if np.isnan(target_width):
+                    target_width = None
+                    mode = "naive"
 
     new_corners = np.array([[0, 0],
                             [target_width, target_height],
@@ -86,7 +148,7 @@ def determine_new_corners(corners, mode="habr"):
 
 
 def remove_perspective_distortion(image, corners):
-    new_corners = determine_new_corners(corners, mode="habr")
+    new_corners = determine_new_corners(corners, image)
     transformed_image = transform_four_points_to_four_points(image, corners, new_corners)
     return transformed_image
 
