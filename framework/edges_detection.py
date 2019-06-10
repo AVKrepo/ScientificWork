@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from collections import defaultdict
+from skimage.transform import hough_line, hough_line_peaks
 
 
 import sys
@@ -101,48 +102,62 @@ def segment_by_angle_kmeans(lines, k=2, **kwargs):
     return segmented
 
 
-def find_hough_lines(edges, threshold="adaptive"):
+def find_hough_lines(edges, threshold="adaptive", mode="opencv"):
     """
 
     :param edges:
     :param threshold:
+    :param mode: which mode to use (["opencv", "skimage"])
     :return: two groups of Hough lines (horizontal and vertical)
     """
-    if type(threshold) != str:
-        hough_lines = cv2.HoughLines(edges, 1, np.pi / 180, threshold)
-    else:
-        left_bound, right_bound = 0, 255
-        left_number, right_number = np.infty, 0
-        while True:
-            t = (left_bound + right_bound) // 2
-            hough_lines = cv2.HoughLines(edges, 1, np.pi / 180, t)
-            new_len = 0 if hough_lines is None else len(hough_lines)
-            if new_len >= 2:
-                first_group, second_group = segment_by_angle_kmeans(hough_lines)
-                min_len = min(len(first_group), len(second_group))
-            else:
-                min_len = 0
-            if min_len < 4:
-                right_bound = t
-                right_number = min_len
-            else:
-                left_bound = t
-                left_number = min_len
-            if min_len == 2 or right_bound - left_bound <= 1:
-                break
+    if mode == "opencv":
+        if type(threshold) != str:
+            hough_lines = cv2.HoughLines(edges, 1, np.pi / 180, threshold)
+        else:
+            left_bound, right_bound = 0, 255
+            left_number, right_number = np.infty, 0
+            while True:
+                t = (left_bound + right_bound) // 2
+                hough_lines = cv2.HoughLines(edges, 1, np.pi / 180, t)
+                new_len = 0 if hough_lines is None else len(hough_lines)
+                if new_len >= 2:
+                    first_group, second_group = segment_by_angle_kmeans(hough_lines)
+                    min_len = min(len(first_group), len(second_group))
+                else:
+                    min_len = 0
+                if min_len < 4:
+                    right_bound = t
+                    right_number = min_len
+                else:
+                    left_bound = t
+                    left_number = min_len
+                if min_len == 2 or right_bound - left_bound <= 1:
+                    break
 
-    hough_lines = cv2.HoughLines(edges, 1, np.pi / 180, t)
-    if hough_lines is None or len(hough_lines) < 4:
-        print("Failed to find good Hough lines")
-    segmented_lines = segment_by_angle_kmeans(hough_lines)
-    return segmented_lines
+        hough_lines = cv2.HoughLines(edges, 1, np.pi / 180, t)
+        if hough_lines is None or len(hough_lines) < 4:
+            print("Failed to find good Hough lines")
+        segmented_lines = segment_by_angle_kmeans(hough_lines)
+        return segmented_lines
+
+    else:
+        h, theta, d = hough_line(edges)
+        peaks = hough_line_peaks(h, theta, d)
+        print("Number of detected lines ", len(peaks[0]))
+        if len(peaks[0]) < 4:
+            print("Failed to find good Hough lines")
+        hough_lines = [[[dist, angle]] for _, angle, dist in zip(*peaks)]
+        segmented_lines = segment_by_angle_kmeans(hough_lines)
+        return segmented_lines
+
+
 
 
 def draw_lines_on_edges(edges, two_lines_groups):
     result = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
     # Draw the lines
-    for j, color in zip(range(2), [(0, 0, 255), (0, 255, 255)]):
+    for j, color in zip(range(2), [(0, 0, 255), (255, 0, 0)]):
         for i in range(0, len(two_lines_groups[j])):
             rho = two_lines_groups[j][i][0][0]
             theta = two_lines_groups[j][i][0][1]
