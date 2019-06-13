@@ -102,7 +102,7 @@ def segment_by_angle_kmeans(lines, k=2, **kwargs):
     return segmented
 
 
-def find_hough_lines(edges, threshold="adaptive", mode="opencv"):
+def find_hough_lines(edges, threshold="adaptive", mode="skimage"):
     """
 
     :param edges:
@@ -137,8 +137,6 @@ def find_hough_lines(edges, threshold="adaptive", mode="opencv"):
         hough_lines = cv2.HoughLines(edges, 1, np.pi / 180, t)
         if hough_lines is None or len(hough_lines) < 4:
             print("Failed to find good Hough lines")
-        segmented_lines = segment_by_angle_kmeans(hough_lines)
-        return segmented_lines
 
     else:
         h, theta, d = hough_line(edges)
@@ -147,17 +145,16 @@ def find_hough_lines(edges, threshold="adaptive", mode="opencv"):
         if len(peaks[0]) < 4:
             print("Failed to find good Hough lines")
         hough_lines = [[[dist, angle]] for _, angle, dist in zip(*peaks)]
-        segmented_lines = segment_by_angle_kmeans(hough_lines)
-        return segmented_lines
 
-
+    segmented_lines = segment_by_angle_kmeans(hough_lines)
+    return segmented_lines
 
 
 def draw_lines_on_edges(edges, two_lines_groups):
     result = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
     # Draw the lines
-    for j, color in zip(range(2), [(0, 0, 255), (255, 0, 0)]):
+    for j, color in zip(range(len(two_lines_groups)), [(0, 0, 255), (127, 255, 0)]):
         for i in range(0, len(two_lines_groups[j])):
             rho = two_lines_groups[j][i][0][0]
             theta = two_lines_groups[j][i][0][1]

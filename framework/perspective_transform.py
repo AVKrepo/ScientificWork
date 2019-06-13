@@ -37,7 +37,7 @@ def transform_four_points_to_four_points(image, start_points, end_points):
     return resulted_image
 
 
-def determine_new_corners(corners, image, mode="zhang"):
+def determine_new_corners(corners, image, mode="all"):
     corners = order_points(corners)
 
     top_left, top_right, down_right, down_left = corners
@@ -118,7 +118,7 @@ def determine_new_corners(corners, image, mode="zhang"):
                 print(k2, k3)
 
                 f_squared = -((k3 * m3y - m1y) * (k2 * m2y - m1y) + (k3 * m3x - m1x) * (k2 * m2x - m1x)) / \
-                            ((k3 - 1) * (k2 - 1))
+                             ((k3 - 1) * (k2 - 1))
 
                 def sqr(x):
                     return x ** 2
@@ -130,13 +130,14 @@ def determine_new_corners(corners, image, mode="zhang"):
 
                 print("hight / width:", 1 / wh_ratio)
                 print("width / hight:", wh_ratio)
+                # print("focal length:", np.sqrt(-f_squared), "pixels")
 
                 target_width = max(top_width, down_width)
                 target_height = max(left_height, right_height)
                 target_height = max(target_height, target_width / wh_ratio)
                 target_width = target_height * wh_ratio
 
-                if np.isnan(target_width):
+                if np.isnan(target_width) or np.abs(k2 - 1) < 1e-3 or np.abs(k3 - 1) < 1e-3:
                     target_width = None
                     mode = "naive"
 

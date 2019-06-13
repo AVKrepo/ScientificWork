@@ -7,7 +7,7 @@ FILE_NUM_TO_SAVE = 0
 MAX_SIZE_TO_SHOW = 960
 
 
-def visualize_image(image, title="", mode="both", inplace=False):
+def visualize_image(image, title="", mode="both", inplace=False, restart=False):
     """
     Function for visualizing image
     :param image: image, which was read by opencv
@@ -15,6 +15,10 @@ def visualize_image(image, title="", mode="both", inplace=False):
     :param mode: string from list ["show", "save", "both"]
     :param inplace: boolean
     """
+    if restart:
+        global FILE_NUM_TO_SAVE
+        FILE_NUM_TO_SAVE = 0
+
     if inplace:  # matplotlib mode
         plt.figure(figsize=(20, 20))
         plt.title(title)
@@ -31,7 +35,6 @@ def visualize_image(image, title="", mode="both", inplace=False):
         image_to_show = image
 
         if mode == "save" or mode == "both":  # saving to file
-            global FILE_NUM_TO_SAVE
             cv2.imwrite(str(FILE_NUM_TO_SAVE) + ".jpg", image_to_show)
             FILE_NUM_TO_SAVE += 1
 
