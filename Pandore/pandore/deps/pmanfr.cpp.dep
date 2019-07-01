@@ -1,0 +1,2 @@
+bin/pmanfr: src/operatorsP0/information/pmanfr.cpp \
+ src/operatorsP0/information/pman.cpp

@@ -67,6 +67,7 @@ def canny_edge_detector(image):
     high_thresh, thresh_im = cv2.threshold(resulted_channel, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     low_thresh = 0.5 * high_thresh
     # edges = cv2.Canny(image, low_thresh, high_thresh)
+    # edges = cv2.Canny(image, low_thresh, high_thresh)
     edges = cv2.Canny(resulted_channel, low_thresh, high_thresh)
     return edges
 

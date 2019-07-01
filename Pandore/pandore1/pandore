@@ -1,0 +1,17 @@
+#!/bin/sh
+
+PANDOREHOME=/home/avk/study/1C/Diplom/Pandore/pandore
+PATH=$PANDOREHOME/bin:$PATH
+LD_LIBRARY_PATH=$PANDOREHOME/lib:$LD_LIBRARY_PATH
+export PATH LD_LIBRARY_PATH PANDOREHOME
+
+version="6.6.7 (Jun 25, 2015)"
+
+echo ;
+echo "PANDORE Version "$version
+echo "GREYC-IMAGE @ Caen France"
+echo;
+
+#SHELL=/bin/zsh
+$SHELL
+

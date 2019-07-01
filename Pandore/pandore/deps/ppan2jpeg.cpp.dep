@@ -1,0 +1,39 @@
+bin/ppan2jpeg: src/operatorsP0/conversion/ppan2jpeg.cpp include/pandore.h \
+ include/ptypes.h include/errc.h include/panfile.h include/pobject.h \
+ include/dimension.h include/point.h include/neighbours.h include/image.h \
+ include/region.h include/graph.h include/plist.h include/promotions.h \
+ include/plimits.h include/collection.h include/bundled.h include/main.h \
+ src/operatorsP0/conversion/jpeg/jerror.c \
+ src/operatorsP0/conversion/jpeg/jinclude.h \
+ src/operatorsP0/conversion/jpeg/jconfig.h \
+ src/operatorsP0/conversion/jpeg/jpeglib.h \
+ src/operatorsP0/conversion/jpeg/jmorecfg.h \
+ src/operatorsP0/conversion/jpeg/jpegint.h \
+ src/operatorsP0/conversion/jpeg/jerror.h \
+ src/operatorsP0/conversion/jpeg/jversion.h \
+ src/operatorsP0/conversion/jpeg/jutils.c \
+ src/operatorsP0/conversion/jpeg/jcapimin.c \
+ src/operatorsP0/conversion/jpeg/jcomapi.c \
+ src/operatorsP0/conversion/jpeg/jcapistd.c \
+ src/operatorsP0/conversion/jpeg/jdatadst.c \
+ src/operatorsP0/conversion/jpeg/jcinit.c \
+ src/operatorsP0/conversion/jpeg/jcparam.c \
+ src/operatorsP0/conversion/jpeg/jccolor.c \
+ src/operatorsP0/conversion/jpeg/jcsample.c \
+ src/operatorsP0/conversion/jpeg/jmemmgr.c \
+ src/operatorsP0/conversion/jpeg/jmemsys.h \
+ src/operatorsP0/conversion/jpeg/jaricom.c \
+ src/operatorsP0/conversion/jpeg/jcarith.c \
+ src/operatorsP0/conversion/jpeg/jchuff.c \
+ src/operatorsP0/conversion/jpeg/jcdctmgr.c \
+ src/operatorsP0/conversion/jpeg/jdct.h \
+ src/operatorsP0/conversion/jpeg/jcprepct.c \
+ src/operatorsP0/conversion/jpeg/jcmarker.c \
+ src/operatorsP0/conversion/jpeg/jfdctint.c \
+ src/operatorsP0/conversion/jpeg/jcmainct.c \
+ src/operatorsP0/conversion/jpeg/jccoefct.c \
+ src/operatorsP0/conversion/jpeg/jfdctflt.c \
+ src/operatorsP0/conversion/jpeg/jfdctfst.c \
+ src/operatorsP0/conversion/jpeg/jcmaster.c \
+ src/operatorsP0/conversion/jpeg/jmemnobs.c \
+ src/operatorsP0/conversion/jpeg/cjpeg.c
