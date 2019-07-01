@@ -1,7 +1,0 @@
-bin/pdisplayperformancevalues: \
- src/operatorsP0/evaluation/pdisplayperformancevalues.cpp \
- src/operatorsP0/evaluation/evaluation/log.h include/pandore.h \
- include/ptypes.h include/errc.h include/panfile.h include/pobject.h \
- include/dimension.h include/point.h include/neighbours.h include/image.h \
- include/region.h include/graph.h include/plist.h include/promotions.h \
- include/plimits.h include/collection.h include/bundled.h include/main.h
