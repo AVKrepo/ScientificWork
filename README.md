@@ -4,9 +4,8 @@ This work is a bachelor thesis on the topic "Correction of distortions in images
 
 Example of functioning of suggested algorithms:
 
-![](example/initial.jpg =800x)
-
-![](example/perspective.jpg =800x)
-
-![](example/light.png =800x)
-
+<p float="left">
+  <img src="example/initial.jpg" width="200" />
+  <img src="example/perspective.jpg" width="200" /> 
+  <img src="example/light.png" width="200" />
+</p>
